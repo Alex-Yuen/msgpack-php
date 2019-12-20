@@ -6,7 +6,7 @@ if (version_compare(PHP_VERSION, '5.2.0') < 0) {
     echo "skip tests in PHP 5.2 or newer";
 }
 if (!extension_loaded("msgpack")) {
-   echo "skip"; 
+   echo "skip";
 }
 --FILE--
 <?php
@@ -33,9 +33,9 @@ Array
 )
 Array
 (
-    [0] => dummy
     [1] => foo
     [2] => bar
+    [0] => dummy
 )
 string(3) "foo"
 string(3) "bar"

@@ -14,6 +14,7 @@ typedef enum
     MSGPACK_UNPACK_EXTRA_BYTES =  1,
     MSGPACK_UNPACK_CONTINUE    =  0,
     MSGPACK_UNPACK_PARSE_ERROR = -1,
+    MSGPACK_UNPACK_NOMEM_ERROR = -2
 } msgpack_unpack_return;
 
 typedef struct _msgpack_unserialize_data {
@@ -26,10 +27,12 @@ typedef struct _msgpack_unserialize_data {
 
 typedef struct {
     zval *retval;
-    long deps;
-    msgpack_unserialize_data_t *var_hash;
-    long stack[MSGPACK_EMBED_STACK_SIZE];
+    const char *eof;
     int type;
+    unsigned int count;
+    long deps;
+    long stack[MSGPACK_EMBED_STACK_SIZE];
+    msgpack_unserialize_data_t var_hash;
 } msgpack_unserialize_data;
 
 void msgpack_unserialize_var_init(msgpack_unserialize_data_t *var_hashx);
@@ -60,10 +63,10 @@ int msgpack_unserialize_double(
 int msgpack_unserialize_nil(msgpack_unserialize_data *unpack, zval **obj);
 int msgpack_unserialize_true(msgpack_unserialize_data *unpack, zval **obj);
 int msgpack_unserialize_false(msgpack_unserialize_data *unpack, zval **obj);
-int msgpack_unserialize_raw(
+int msgpack_unserialize_str(
     msgpack_unserialize_data *unpack, const char* base, const char* data,
     unsigned int len, zval **obj);
-int msgpack_unserialize_bin(
+int msgpack_unserialize_ext(
     msgpack_unserialize_data *unpack, const char* base, const char* data,
     unsigned int len, zval **obj);
 int msgpack_unserialize_array(
@@ -124,10 +127,12 @@ static inline msgpack_unpack_object template_callback_root(unpack_user* user)
     msgpack_unserialize_true(user, obj)
 #define template_callback_false(user, obj) \
     msgpack_unserialize_false(user, obj)
-#define template_callback_raw(user, base, data, len, obj) \
-    msgpack_unserialize_raw(user, base, data, len, obj)
-#define template_callback_bin(user, base, data, len, obj) \
-    msgpack_unserialize_bin(user, base, data, len, obj)
+#define template_callback_ext(user, base, data, len, obj) \
+    msgpack_unserialize_ext(user, base, data, len, obj)
+#define template_callback_raw template_callback_str
+#define template_callback_bin template_callback_str
+#define template_callback_str(user, base, data, len, obj)  \
+        msgpack_unserialize_str(user, base, data, len, obj)
 #define template_callback_array(user, count, obj) \
     msgpack_unserialize_array(user, count, obj)
 #define template_callback_array_item(user, container, obj) \

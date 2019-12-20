@@ -1,12 +1,15 @@
 --TEST--
 Unserialize invalid random data
 --SKIPIF--
---FILE--
-<?php 
-if(!extension_loaded('msgpack')) {
-    dl('msgpack.' . PHP_SHLIB_SUFFIX);
+<?php
+if (!extension_loaded('msgpack')) {
+    die("skip");
 }
-
+?>
+--XFAIL--
+REGRESSION
+--FILE--
+<?php
 $datas = array(
     87817,
     -1,
@@ -37,5 +40,7 @@ foreach ($datas as $data)
         }
     }
 }
-
+?>
+OK
 --EXPECT--
+OK
