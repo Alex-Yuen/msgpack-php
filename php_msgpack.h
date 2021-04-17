@@ -3,7 +3,7 @@
 
 #include "Zend/zend_smart_str.h" /* for smart_string */
 
-#define PHP_MSGPACK_VERSION "2.0.4-dev"
+#define PHP_MSGPACK_VERSION "2.1.2"
 
 extern zend_module_entry msgpack_module_entry;
 #define phpext_msgpack_ptr &msgpack_module_entry
@@ -50,6 +50,12 @@ PHP_MSGPACK_API int php_msgpack_unserialize(
 #else
 # define MSGPACK_ENDIAN_LITTLE_BYTE 1
 # define MSGPACK_ENDIAN_BIG_BYTE 0
+#endif
+
+#if PHP_VERSION_ID < 80000
+# define OBJ_FOR_PROP(zv) (zv)
+#else
+# define OBJ_FOR_PROP(zv) Z_OBJ_P(zv)
 #endif
 
 #endif  /* PHP_MSGPACK_H */

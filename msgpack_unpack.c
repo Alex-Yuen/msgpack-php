@@ -12,9 +12,6 @@
 #if PHP_VERSION_ID < 70400
 # define zval_try_get_string zval_get_string
 #endif
-#if PHP_VERSION_ID < 70200
-# define zend_string_init_interned zend_string_init
-#endif
 
 typedef struct {
     zend_long used_slots;
@@ -116,7 +113,7 @@ static inline void msgpack_var_replace(zval *old, zval *new) /* {{{ */ {
 static zval *msgpack_var_access(msgpack_unserialize_data_t *var_hashx, zend_long id) /* {{{ */ {
     var_entries *var_hash = var_hashx->first;
 
-    while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
+    while (id > VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
         var_hash = var_hash->next;
         id -= VAR_ENTRIES_MAX;
     }
@@ -125,7 +122,7 @@ static zval *msgpack_var_access(msgpack_unserialize_data_t *var_hashx, zend_long
         return NULL;
     }
 
-    if (id > 0 && id < var_hash->used_slots) {
+    if (id > 0 && id <= var_hash->used_slots) {
         zval *zv = &var_hash->data[id - 1];
         if (UNEXPECTED(Z_TYPE_P(zv) == IS_INDIRECT)) {
             zv = Z_INDIRECT_P(zv);
@@ -282,7 +279,7 @@ static zend_class_entry* msgpack_unserialize_class(zval **container, zend_string
         ZVAL_STRING(&user_func, PG(unserialize_callback_func));
         ZVAL_STR(&args[0], class_name);
 
-        func_call_status = call_user_function_ex(CG(function_table), NULL, &user_func, &retval, 1, args, 0, NULL);
+        func_call_status = call_user_function(CG(function_table), NULL, &user_func, &retval, 1, args);
         zval_ptr_dtor(&user_func);
         if (func_call_status != SUCCESS) {
             MSGPACK_WARNING("[msgpack] (%s) defined (%s) but not found",
@@ -329,7 +326,11 @@ static zend_class_entry* msgpack_unserialize_class(zval **container, zend_string
 
     /* store incomplete class name */
     if (incomplete_class) {
+#if PHP_VERSION_ID < 80000
         php_store_class_name(container_val, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+#else
+        php_store_class_name(container_val, class_name);
+#endif
     }
 
     return ce;
@@ -523,12 +524,7 @@ int msgpack_unserialize_str(msgpack_unserialize_data *unpack, const char* base, 
         ZVAL_EMPTY_STRING(*obj);
     } else {
         /* TODO: check malformed input? */
-        if (len < 1<<8) {
-            zend_string *zs = zend_string_init_interned(data, len, 0);
-            ZVAL_STR(*obj, zs);
-        } else {
-            ZVAL_STRINGL(*obj, data, len);
-        }
+        ZVAL_STRINGL(*obj, data, len);
     }
 
     return 0;
@@ -836,7 +832,7 @@ int msgpack_unserialize_map_item(msgpack_unserialize_data *unpack, zval **contai
                 zend_hash_str_exists(&Z_OBJCE_P(container_val)->function_table, "__wakeup", sizeof("__wakeup") - 1)) {
             zval wakeup, r;
             ZVAL_STRING(&wakeup, "__wakeup");
-            call_user_function_ex(CG(function_table), container_val, &wakeup, &r, 0, NULL, 1, NULL);
+            call_user_function(CG(function_table), container_val, &wakeup, &r, 0, NULL);
             zval_ptr_dtor(&r);
             zval_ptr_dtor(&wakeup);
         }

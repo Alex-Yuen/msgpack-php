@@ -16,30 +16,36 @@
   <email>laruence@php.net</email>
   <active>yes</active>
  </lead>
- <date>2018-12-20</date>
- <time>18:22:00</time>
+ <lead>
+  <name>Michael Wallner</name>
+  <user>mike</user>
+  <email>mike@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2020-11-27</date>
  <version>
-  <release>2.0.3</release>
+  <release>2.1.2</release>
   <api>2.0.3</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
- <license filesource="LICENSE">New BSD</license>
- <notes>
-  - Fixed PHP-7.3 Compatibility
- </notes>
+ <license filesource="LICENSE">3-Clause-BSD</license>
+ <notes><![CDATA[
+* PHP-8 compatibility. (Remi Collet, Michael Wallner)
+* Fixed #152: Split tests for #67 regarding 32/64bit platforms. (Andy Postnikov)
+* Fixed #153 and #147: Small string optimization causes excessive memory 
+  consumption under specific workloads. (Michael Wallner)
+ ]]></notes>
  <contents>
   <dir name="/">
    <file name="LICENSE" role="doc" />
    <file name="README.md" role="doc" />
    <file name="CREDITS" role="doc" />
-   <file name="ChangeLog" role="doc" />
    <file name="EXPERIMENTAL" role="doc" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
-   <file name="msgpack.php" role="src" />
    <file name="msgpack.c" role="src" />
    <file name="msgpack_class.c" role="src" />
    <file name="msgpack_class.h" role="src" />
@@ -57,6 +63,7 @@
    <file name="msgpack/unpack_template.h" role="src" />
    <file name="msgpack/sysdep.h" role="src" />
    <file name="msgpack/version.h" role="src" />
+   <file name="msgpack/version_master.h" role="src" />
    <dir name="tests">
     <file name="001.phpt" role="test" />
     <file name="002.phpt" role="test" />
@@ -67,6 +74,7 @@
     <file name="007.phpt" role="test" />
     <file name="008.phpt" role="test" />
     <file name="009.phpt" role="test" />
+    <file name="009a.phpt" role="test" />
     <file name="010.phpt" role="test" />
     <file name="012.phpt" role="test" />
     <file name="013.phpt" role="test" />
@@ -85,6 +93,7 @@
     <file name="024.phpt" role="test" />
     <file name="025.phpt" role="test" />
     <file name="026.phpt" role="test" />
+    <file name="026a.phpt" role="test" />
     <file name="027.phpt" role="test" />
     <file name="028.phpt" role="test" />
     <file name="029.phpt" role="test" />
@@ -173,18 +182,26 @@
     <file name="137.phpt" role="test" />
     <file name="138.phpt" role="test" />
     <file name="139.phpt" role="test" />
+    <file name="140.phpt" role="test" />
     <file name="bug002.phpt" role="test" />
     <file name="bug006.phpt" role="test" />
     <file name="bug011.phpt" role="test" />
     <file name="bug012.phpt" role="test" />
     <file name="bug013.phpt" role="test" />
     <file name="issue023.phpt" role="test" />
+    <file name="issue067.phpt" role="test" />
+    <file name="issue067_32bit.phpt" role="test" />
     <file name="issue080.phpt" role="test" />
-    <file name="issue094.phpt" role="test" />
+    <file name="issue081.phpt" role="test" />
     <file name="issue083.phpt" role="test" />
+    <file name="issue091.phpt" role="test" />
+    <file name="issue094.phpt" role="test" />
     <file name="issue107.phpt" role="test" />
     <file name="issue132.phpt" role="test" />
+    <file name="issue137.phpt" role="test" />
     <file name="issue139.phpt" role="test" />
+    <file name="issue149.phpt" role="test" />
+    <file name="issue149.ser.txt" role="test" />
    </dir>
   </dir>
  </contents>
@@ -200,152 +217,208 @@
  </dependencies>
  <providesextension>msgpack</providesextension>
  <extsrcrelease />
- <changelog> 
-  <release> 
-   <date>2018-12-20</date> 
-   <version> 
-    <release>2.0.3</release> 
-    <api>2.0.3</api> 
-   </version> 
-   <stability> 
-    <release>stable</release> 
-    <api>stable</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+ <changelog>
+
+  <release>
+   <date>2020-07-27</date>
+    <version>
+     <release>2.1.1</release>
+     <api>2.0.3</api>
+    </version>
+    <stability>
+     <release>stable</release>
+     <api>stable</api>
+    </stability>
+    <license filesource="LICENSE">3-Clause-BSD</license>
+    <notes><![CDATA[
+* Fixed issue #149: msgpack unpack error
+]]></notes>
+  </release>
+
+  <release>
+   <date>2020-02-28</date>
+   <version>
+    <release>2.1.0</release>
+    <api>2.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license filesource="LICENSE">3-Clause-BSD</license>
+   <notes><![CDATA[
++ Improved performance
++ Upgraded bundled msgpack headers to 3.2.0
+* Merged PR #101: Update README in order to match compatibile PHP version
+* Merged PR #125: fix ce->name is a zend_string
+* Merged PR #106: Update README
+* Merged PR #126: add mising tests in archive
+* Merged PR #135: Add fixes for issue #81 This also includes tests.
+* Merged PR #143: Fixed build with PHP-7.4
+* Fixed issue #139: Segmentation fault when using cloned unpacker
+* Fixed issue #132: Segfault on session php7.3
+* Fixed issue #107: $unpacker->execute() bug
+* Fixed issue #83: Arrays and negative index
+* Fixed issue #137: DateTime(Immutable) serialization doesn't work with php 7.4 RC1
+* Fixed issue #105: MessagePackUnpacker() bug
+* Fixed issue #90: msgpack_unpack is super slow (30x times igbinary) on big data sets
+* Fixed issue #91: Private property in base class
+* Fixed issue #67: Integer overflow on a 64-bit system
+* Fixed issue #33: int64 and uint64 decode is not supported in 32-bit php
+* Fixed issue #119: uint64 numbers are cast to uint on Windows
+* Fixed issue #134: msgpack-php msgpack_serialize/msgpack_pack not handling properly large int
+* Fixed issue #81: Serialize optimization
+* Fixed issue #108: tests/041.phpt failure
+* Fixed issue #142: Recursion encoded as NULL
+* Fixed issue #138: Serializers comparison for session like data
+ ]]></notes>
+  </release>
+
+  <release>
+   <date>2018-12-20</date>
+   <version>
+    <release>2.0.3</release>
+    <api>2.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Fixed PHP-7.3 Compatibility
-   </notes> 
-  </release> 
+   </notes>
+  </release>
 
-  <release> 
-   <date>2016-12-07</date> 
-   <version> 
-    <release>2.0.2</release> 
-    <api>2.0.2</api> 
-   </version> 
-   <stability> 
-    <release>stable</release> 
-    <api>stable</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+  <release>
+   <date>2016-12-07</date>
+   <version>
+    <release>2.0.2</release>
+    <api>2.0.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Fixed issue #104 (PHP7.1 build:Use own definition of msgpack_unserialize_data_t)
-   </notes> 
-  </release> 
-  <release> 
-   <date>2016-03-01</date> 
-   <version> 
-    <release>2.0.1</release> 
-    <api>2.0.1</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2016-03-01</date>
+   <version>
+    <release>2.0.1</release>
+    <api>2.0.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Fixed issue #82 (Check hash protection flag to avoid memory corruption)
     - Fixed Issue #80 (Serialized failed on unseted value)
     - When packing/unpacking a zend_object don't call magic methods __set/__get
-   </notes> 
-  </release> 
-  <release> 
-   <date>2015-10-27</date> 
-   <version> 
-    <release>2.0.0</release> 
-    <api>2.0.0</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2015-10-27</date>
+   <version>
+    <release>2.0.0</release>
+    <api>2.0.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
    - Release msgpack for PHP7
-   </notes> 
-  </release> 
-  <release> 
-   <date>2015-04-27</date> 
-   <version> 
-    <release>0.5.6</release> 
-    <api>0.5.6</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2015-04-27</date>
+   <version>
+    <release>0.5.6</release>
+    <api>0.5.6</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
    - support str8 type (wudikua)
    - Fix a warning and a possible crash (Mike)
    - Fix crash with memcached (Mike)
-   </notes> 
-  </release> 
-  <release> 
-   <date>2013-02-19</date> 
-   <version> 
-    <release>0.5.5</release> 
-    <api>0.5.5</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2013-02-19</date>
+   <version>
+    <release>0.5.5</release>
+    <api>0.5.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Fix ZTS build
     - Fixed Bug #14 ("Invalid read" reported by valgrind)
     - Fixed FR #8 (Return on unserialization)
-   </notes> 
-  </release> 
-  <release> 
-   <date>2013-02-18</date> 
-   <version> 
-    <release>0.5.4</release> 
-    <api>0.5.4</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2013-02-18</date>
+   <version>
+    <release>0.5.4</release>
+    <api>0.5.4</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Fixed Bug #12 (msgpack_seriallize interfere with php serialize).
     - Fixed Bug #11 (unpacking empty array / segmentation fault).
-   </notes> 
-  </release> 
-  <release> 
-   <date>2012-10-12</date> 
-   <version> 
-    <release>0.5.3</release> 
-    <api>0.5.3</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2012-10-12</date>
+   <version>
+    <release>0.5.3</release>
+    <api>0.5.3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Fixed Bug #6 (bug with incorrect packing of mixed arrays)
-   </notes> 
-  </release> 
-  <release> 
-   <date>2012-09-14</date> 
-   <version> 
-    <release>0.5.2</release> 
-    <api>0.5.2</api> 
-   </version> 
-   <stability> 
-    <release>beta</release> 
-    <api>beta</api> 
-   </stability> 
-   <license uri="http://www.php.net/license">PHP License</license> 
+   </notes>
+  </release>
+  <release>
+   <date>2012-09-14</date>
+   <version>
+    <release>0.5.2</release>
+    <api>0.5.2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP License</license>
    <notes>
     - Initial release
-   </notes> 
-  </release> 
+   </notes>
+  </release>
  </changelog>
 </package>
 <!--
 vim:et:ts=1:sw=1
---> 
+-->
