@@ -2,6 +2,10 @@
 #include "php_ini.h"
 #include "ext/standard/php_incomplete_class.h"
 
+#if PHP_VERSION_ID >= 80100
+#include "Zend/zend_enum.h"
+#endif
+
 #include "php_msgpack.h"
 #include "msgpack_pack.h"
 #include "msgpack_unpack.h"
@@ -584,7 +588,7 @@ int msgpack_unserialize_map(msgpack_unpack_data *unpack, unsigned int count, zva
     unpack->count = count;
 
     if (count == 0) {
-        if (MSGPACK_G(php_only)) {
+        if (MSGPACK_G(php_only) || !MSGPACK_G(assoc)) {
             object_init(*obj);
         } else {
             array_init(*obj);
@@ -617,6 +621,7 @@ int msgpack_unserialize_map_item(msgpack_unpack_data *unpack, zval **container, 
                     case MSGPACK_SERIALIZE_TYPE_CUSTOM_OBJECT:
                     case MSGPACK_SERIALIZE_TYPE_OBJECT_REFERENCE:
                     case MSGPACK_SERIALIZE_TYPE_OBJECT:
+                    case MSGPACK_SERIALIZE_TYPE_ENUM:
                         unpack->type = Z_LVAL_P(val);
                         break;
                     default:
@@ -674,6 +679,26 @@ int msgpack_unserialize_map_item(msgpack_unpack_data *unpack, zval **container, 
                     return 0;
                 }
 
+                case MSGPACK_SERIALIZE_TYPE_ENUM:
+                {
+                    if (Z_TYPE_P(key) != IS_STRING) {
+                        MSGPACK_UNSERIALIZE_FINISH_MAP_ITEM(unpack, key, val);
+                        return MSGPACK_UNPACK_PARSE_ERROR;
+                    }
+
+#if PHP_VERSION_ID < 80100
+                    MSGPACK_WARNING(
+                        "[msgpack] (%s) Class %s is an Enum and not supported below PHP 8.1",
+                        __FUNCTION__, Z_STRVAL_P(key));
+#else
+                    ce = msgpack_unserialize_class(container, Z_STR_P(key), 0);
+                    zend_object *enum_instance = zend_enum_get_case(ce, Z_STR_P(val));
+                    ZVAL_OBJ(*container, enum_instance);
+#endif
+                    MSGPACK_UNSERIALIZE_FINISH_MAP_ITEM(unpack, key, val);
+                    return 0;
+                }
+
                 case MSGPACK_SERIALIZE_TYPE_RECURSIVE:
                 case MSGPACK_SERIALIZE_TYPE_OBJECT:
                 case MSGPACK_SERIALIZE_TYPE_OBJECT_REFERENCE:
@@ -709,6 +734,10 @@ int msgpack_unserialize_map_item(msgpack_unpack_data *unpack, zval **container, 
     }
 
     container_val = Z_ISREF_P(*container) ? Z_REFVAL_P(*container) : *container;
+
+    if (!MSGPACK_G(assoc) && Z_TYPE_P(container_val) != IS_ARRAY && Z_TYPE_P(container_val) != IS_OBJECT) {
+        object_init(container_val);
+    }
 
     if (Z_TYPE_P(container_val) == IS_OBJECT) {
         switch (Z_TYPE_P(key)) {

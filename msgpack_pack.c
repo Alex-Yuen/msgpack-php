@@ -6,6 +6,10 @@
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/php_var.h"
 
+#if PHP_VERSION_ID >= 80100
+#include "Zend/zend_enum.h"
+#endif
+
 #include "php_msgpack.h"
 #include "msgpack_pack.h"
 #include "msgpack_errors.h"
@@ -21,6 +25,9 @@
 
 #include "msgpack/pack_template.h"
 
+#if PHP_VERSION_ID >= 80100
+# define msgpack_check_ht_is_map(array) (!zend_array_is_list(Z_ARRVAL_P(array)))
+#else
 static inline int msgpack_check_ht_is_map(zval *array) /* {{{ */ {
     Bucket *b;
     zend_ulong i = 0;
@@ -35,6 +42,7 @@ static inline int msgpack_check_ht_is_map(zval *array) /* {{{ */ {
     return 0;
 }
 /* }}} */
+#endif
 
 static inline int msgpack_var_add(HashTable *var_hash, zval *var, zend_long *var_old) /* {{{ */ {
     uint32_t len;
@@ -252,7 +260,9 @@ static inline void msgpack_serialize_array(smart_str *buf, zval *val, HashTable 
     }
 
     if (object) {
-        if (MSGPACK_G(php_only)) {
+        if (!MSGPACK_G(assoc) && (!MSGPACK_G(php_only) || !strcmp(class_name, "stdClass"))) {
+            msgpack_pack_map(buf, n);
+        } else if (MSGPACK_G(php_only)) {
             if (is_ref) {
                 msgpack_pack_map(buf, n + 2);
                 msgpack_pack_nil(buf);
@@ -401,6 +411,19 @@ static inline void msgpack_serialize_object(smart_str *buf, zval *val, HashTable
     if (ce && (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE)) {
         msgpack_pack_nil(buf);
         zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed", ZSTR_VAL(ce->name));
+        PHP_CLEANUP_CLASS_ATTRIBUTES();
+        return;
+    }
+    if (ce && (ce->ce_flags & ZEND_ACC_ENUM)) {
+        zval *enum_case_name = zend_enum_fetch_case_name(Z_OBJ_P(val_noref));
+        msgpack_pack_map(buf, 2);
+
+        msgpack_pack_nil(buf);
+        msgpack_pack_long(buf, MSGPACK_SERIALIZE_TYPE_ENUM);
+
+        msgpack_serialize_string(buf, ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
+        msgpack_serialize_string(buf, Z_STRVAL_P(enum_case_name), Z_STRLEN_P(enum_case_name));
+
         PHP_CLEANUP_CLASS_ATTRIBUTES();
         return;
     }

@@ -3,7 +3,7 @@
 
 #include "Zend/zend_smart_str.h" /* for smart_string */
 
-#define PHP_MSGPACK_VERSION "2.2.0RC1"
+#define PHP_MSGPACK_VERSION "3.0.0"
 
 extern zend_module_entry msgpack_module_entry;
 #define phpext_msgpack_ptr &msgpack_module_entry
@@ -23,6 +23,7 @@ extern zend_module_entry msgpack_module_entry;
 ZEND_BEGIN_MODULE_GLOBALS(msgpack)
     zend_bool error_display;
     zend_bool php_only;
+    zend_bool assoc;
     zend_bool illegal_key_insert;
     zend_bool use_str8_serialization;
     struct {

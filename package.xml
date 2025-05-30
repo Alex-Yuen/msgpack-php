@@ -22,26 +22,30 @@
   <email>mike@php.net</email>
   <active>yes</active>
  </lead>
- <date>2021-08-30</date>
+ <date>2024-09-25</date>
  <version>
-  <release>2.2.0RC1</release>
-  <api>2.2.0</api>
+  <release>3.0.0</release>
+  <api>3.0.0</api>
  </version>
  <stability>
-  <release>beta</release>
+  <release>stable</release>
   <api>stable</api>
  </stability>
  <license filesource="LICENSE">3-Clause-BSD</license>
  <notes><![CDATA[
-* Fixed PHP-8.1 compatibility (see gh issues #161, #157, and #156)
-* Added support for ZEND_ACC_NOT_SERIALIZABLE and magic __{,un}serialize
+* Add support for PHP-8.1 Enums
+  * merges #173
+  * fixes #171
+* Add support for APCu
+  * merges #162, #93
+* Add OPT_ASSOC for roundtrip serialization of map.
+  * merges #58
  ]]></notes>
  <contents>
   <dir name="/">
    <file name="LICENSE" role="doc" />
    <file name="README.md" role="doc" />
    <file name="CREDITS" role="doc" />
-   <file name="EXPERIMENTAL" role="doc" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="msgpack.c" role="src" />
@@ -182,11 +186,14 @@
     <file name="138.phpt" role="test" />
     <file name="139.phpt" role="test" />
     <file name="140.phpt" role="test" />
+    <file name="apcu.phpt" role="test" />
+    <file name="assoc.phpt" role="test" />
     <file name="bug002.phpt" role="test" />
     <file name="bug006.phpt" role="test" />
     <file name="bug011.phpt" role="test" />
     <file name="bug012.phpt" role="test" />
     <file name="bug013.phpt" role="test" />
+    <file name="enum001.phpt" role="test" />
     <file name="issue023.phpt" role="test" />
     <file name="issue067.phpt" role="test" />
     <file name="issue067_32bit.phpt" role="test" />
@@ -201,6 +208,7 @@
     <file name="issue139.phpt" role="test" />
     <file name="issue149.phpt" role="test" />
     <file name="issue149.ser.txt" role="test" />
+    <file name="issue171.phpt" role="test" />
    </dir>
   </dir>
  </contents>
@@ -217,6 +225,42 @@
  <providesextension>msgpack</providesextension>
  <extsrcrelease />
  <changelog>
+
+  <release>
+   <date>2023-06-02</date>
+   <version>
+    <release>2.2.0</release>
+    <api>2.2.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license filesource="LICENSE">3-Clause-BSD</license>
+   <notes><![CDATA[
+* Fix PHP-8.2 compatibility (see gh issue #165)
+* Fix PHP-8.1 compatibility (see gh issues #161, #157, and #156)
+* Add support for ZEND_ACC_NOT_SERIALIZABLE and magic __{,un}serialize
+]]></notes>
+  </release>
+
+  <release>
+   <date>2020-11-27</date>
+   <version>
+    <release>2.1.2</release>
+    <api>2.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license filesource="LICENSE">3-Clause-BSD</license>
+   <notes><![CDATA[
+* PHP-8 compatibility. (Remi Collet, Michael Wallner)
+* Fixed #152: Split tests for #67 regarding 32/64bit platforms. (Andy Postnikov)
+* Fixed #153 and #147: Small string optimization causes excessive memory consumption under specific workloads. (Michael Wallner)
+]]></notes>
+  </release>
 
   <release>
    <date>2020-07-27</date>
